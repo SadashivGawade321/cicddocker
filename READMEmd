@@ -1,0 +1,914 @@
+# 🚀 Flask CI/CD Pipeline with GitHub Actions & Docker
+
+A simple CI/CD project demonstrating how to automate the testing, building, and containerization of a Flask application using **GitHub Actions, Pytest, Docker, and Docker Hub**.
+
+---
+
+## 📌 Project Overview
+
+In a traditional development workflow, developers manually test, build, and package applications.
+
+This project automates that process using **GitHub Actions**.
+
+Whenever code is pushed to the `main` branch, GitHub Actions automatically:
+
+1. Checks out the source code
+2. Sets up Python
+3. Installs dependencies
+4. Runs unit tests
+5. Builds the Docker image
+6. Logs in to Docker Hub
+7. Pushes the Docker image to Docker Hub
+
+### 🔄 CI/CD Workflow
+
+```text
+                    👨‍💻 Developer
+                         │
+                         ▼
+                    Git Push
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ GitHub Repository│
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ GitHub Actions  │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │  Checkout Code  │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │   Setup Python  │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Install         │
+                │ Dependencies    │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │  Unit Testing   │
+                │     Pytest      │
+                └────────┬────────┘
+                         │
+                    Tests Pass?
+                    /          \
+                  NO            YES
+                  │              │
+                  ▼              ▼
+               ❌ STOP     ┌──────────────┐
+                           │ Docker Build │
+                           └──────┬───────┘
+                                  │
+                                  ▼
+                           ┌──────────────┐
+                           │ Docker Image │
+                           └──────┬───────┘
+                                  │
+                                  ▼
+                           ┌──────────────┐
+                           │  Docker Hub  │
+                           └──────┬───────┘
+                                  │
+                                  ▼
+                             🚀 Deploy
+```
+
+---
+
+# 🧠 What is CI/CD?
+
+## Continuous Integration (CI)
+
+Continuous Integration means automatically testing and validating code whenever new changes are pushed to a shared repository.
+
+In this project:
+
+```text
+Code Push
+    ↓
+Install Dependencies
+    ↓
+Run Unit Tests
+    ↓
+Build Application
+```
+
+If the tests fail, the workflow stops.
+
+```text
+Code
+ ↓
+Unit Tests
+ ↓
+❌ Failed
+ ↓
+Pipeline Stops
+```
+
+This prevents broken code from moving further in the pipeline.
+
+---
+
+## Continuous Delivery / Deployment (CD)
+
+After the code passes the CI stage, it can be packaged and prepared for deployment.
+
+In this project:
+
+```text
+Tests Passed
+     ↓
+Docker Build
+     ↓
+Docker Image
+     ↓
+Docker Hub
+     ↓
+Deployment
+```
+
+Docker Hub acts as a **container registry** where the Docker image is stored.
+
+---
+
+# 🐍 Flask Application
+
+The application is built using **Flask**, a lightweight Python web framework.
+
+Example:
+
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello from Flask CI/CD Pipeline!"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+```
+
+The application can be accessed at:
+
+```text
+http://localhost:5000
+```
+
+---
+
+# 🧪 Unit Testing
+
+Unit testing means testing individual parts of the application independently.
+
+For example:
+
+```python
+def add(a, b):
+    return a + b
+```
+
+A unit test can verify the function:
+
+```python
+def test_add():
+    assert add(2, 3) == 5
+```
+
+The project uses **Pytest** for automated testing.
+
+Run tests locally:
+
+```bash
+pytest
+```
+
+Example:
+
+```text
+========================
+1 passed
+========================
+```
+
+If a test fails:
+
+```text
+========================
+1 failed
+========================
+```
+
+the GitHub Actions workflow fails and the pipeline does not continue.
+
+---
+
+# 🔍 Unit Testing vs Build & Test
+
+### Unit Testing
+
+Unit testing checks individual pieces of code.
+
+```text
+Function
+   ↓
+Unit Test
+   ↓
+Pass / Fail
+```
+
+Example:
+
+```python
+def add(a, b):
+    return a + b
+```
+
+Testing:
+
+```python
+assert add(2, 3) == 5
+```
+
+### Build & Test
+
+Build & Test is a broader process that verifies that the application can be successfully prepared and built.
+
+For this project:
+
+```text
+Source Code
+     ↓
+Install Dependencies
+     ↓
+Run Tests
+     ↓
+Docker Build
+     ↓
+Docker Image
+```
+
+---
+
+# 🐳 Docker
+
+Docker is used to package the Flask application into a portable container image.
+
+The Docker image contains:
+
+```text
+Python
+Flask
+Application Code
+Dependencies
+Configuration
+```
+
+This makes the application easier to run consistently across different environments.
+
+---
+
+# 📄 Dockerfile
+
+Example Dockerfile:
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
+```
+
+### Dockerfile Explanation
+
+| Instruction | Purpose |
+|---|---|
+| `FROM` | Defines the base Python image |
+| `WORKDIR` | Sets the working directory |
+| `COPY` | Copies files into the container |
+| `RUN` | Executes commands during image creation |
+| `EXPOSE` | Documents the application port |
+| `CMD` | Starts the application |
+
+---
+
+# 📦 requirements.txt
+
+The project's Python dependencies are stored in:
+
+```text
+requirements.txt
+```
+
+Example:
+
+```text
+Flask
+pytest
+```
+
+Install them using:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 🤖 GitHub Actions
+
+GitHub Actions is used to automate the CI/CD workflow.
+
+The workflow file is stored at:
+
+```text
+.github/workflows/python-app.yml
+```
+
+Example workflow:
+
+```yaml
+name: Flask CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build-test-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Checkout source code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run unit tests
+      - name: Run Unit Tests
+        run: |
+          pytest
+
+      # Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t flask-app .
+
+      # Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Push Docker image
+      - name: Push Docker Image
+        run: |
+          docker tag flask-app:latest ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+```
+
+---
+
+# 🔎 GitHub Actions Workflow Explanation
+
+## 1. Workflow Trigger
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+The workflow starts whenever code is pushed to the `main` branch.
+
+For example:
+
+```bash
+git add .
+git commit -m "Update Flask application"
+git push origin main
+```
+
+---
+
+## 2. GitHub Actions Runner
+
+```yaml
+runs-on: ubuntu-latest
+```
+
+GitHub provides a temporary Ubuntu environment to execute the workflow.
+
+---
+
+## 3. Checkout Code
+
+```yaml
+uses: actions/checkout@v4
+```
+
+Downloads the repository code into the GitHub Actions runner.
+
+---
+
+## 4. Setup Python
+
+```yaml
+uses: actions/setup-python@v5
+```
+
+Configures the Python version required by the project.
+
+```yaml
+python-version: "3.12"
+```
+
+---
+
+## 5. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Installs Flask, Pytest, and other project dependencies.
+
+---
+
+## 6. Run Unit Tests
+
+```bash
+pytest
+```
+
+Runs all automated tests.
+
+If tests pass:
+
+```text
+✅ Tests Passed
+```
+
+the pipeline continues.
+
+If tests fail:
+
+```text
+❌ Tests Failed
+```
+
+the pipeline stops.
+
+---
+
+## 7. Build Docker Image
+
+```bash
+docker build -t flask-app .
+```
+
+Docker reads the `Dockerfile` and creates an image.
+
+Example:
+
+```text
+flask-app:latest
+```
+
+---
+
+# 🐳 Docker Hub
+
+Docker Hub is a **container registry**.
+
+It stores Docker images so they can later be downloaded and used by servers or deployment platforms.
+
+The workflow pushes the image using:
+
+```bash
+docker push username/flask-app:latest
+```
+
+The final flow is:
+
+```text
+Dockerfile
+    ↓
+Docker Build
+    ↓
+Docker Image
+    ↓
+Docker Hub
+```
+
+---
+
+# 🔐 GitHub Secrets
+
+Docker Hub credentials should never be written directly inside the workflow file.
+
+❌ Never do:
+
+```yaml
+username: myusername
+password: mypassword
+```
+
+Instead, use GitHub Secrets:
+
+```yaml
+username: ${{ secrets.DOCKER_USERNAME }}
+password: ${{ secrets.DOCKER_PASSWORD }}
+```
+
+Create these repository secrets:
+
+```text
+DOCKER_USERNAME
+DOCKER_PASSWORD
+```
+
+GitHub securely provides these values to the workflow.
+
+---
+
+# 🧑‍💻 Local Setup
+
+## 1. Clone the Repository
+
+```bash
+git clone <YOUR_REPOSITORY_URL>
+```
+
+```bash
+cd cicdfiledemo
+```
+
+---
+
+## 2. Create Python Virtual Environment
+
+This project can use Python's built-in virtual environment instead of Conda.
+
+```powershell
+python -m venv venv
+```
+
+Activate it on Windows PowerShell:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+After activation:
+
+```text
+(venv) PS C:\Users\gawad\OneDrive\Desktop\cicdfiledemo>
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Run Flask Application
+
+```bash
+python app.py
+```
+
+Open:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## 5. Run Unit Tests
+
+```bash
+pytest
+```
+
+---
+
+## 6. Build Docker Image
+
+```bash
+docker build -t flask-app .
+```
+
+---
+
+## 7. Run Docker Container
+
+```bash
+docker run -p 5000:5000 flask-app
+```
+
+Open:
+
+```text
+http://localhost:5000
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+cicdfiledemo/
+│
+├── .github/
+│   └── workflows/
+│       └── python-app.yml
+│
+├── tests/
+│   └── test_app.py
+│
+├── app.py
+├── requirements.txt
+├── Dockerfile
+├── README.md
+└── .gitignore
+```
+
+### File Description
+
+| File / Folder | Description |
+|---|---|
+| `app.py` | Flask application |
+| `tests/` | Unit tests |
+| `test_app.py` | Pytest test cases |
+| `requirements.txt` | Python dependencies |
+| `Dockerfile` | Docker image configuration |
+| `.github/workflows/` | GitHub Actions workflows |
+| `python-app.yml` | CI/CD workflow |
+| `.gitignore` | Files ignored by Git |
+| `README.md` | Project documentation |
+
+---
+
+# 🔄 Complete Pipeline
+
+```text
+┌───────────────────┐
+│    Developer      │
+└─────────┬─────────┘
+          │
+          │ git push
+          ▼
+┌───────────────────┐
+│ GitHub Repository │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│  GitHub Actions   │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│   Checkout Code   │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│    Setup Python   │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Install Packages  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│   Unit Testing    │
+│      Pytest       │
+└─────────┬─────────┘
+          │
+       ┌──┴───┐
+       │      │
+     FAIL    PASS
+       │      │
+       ▼      ▼
+    ❌ STOP  ┌───────────────────┐
+             │  Docker Build     │
+             └─────────┬─────────┘
+                       │
+                       ▼
+             ┌───────────────────┐
+             │   Docker Image    │
+             └─────────┬─────────┘
+                       │
+                       ▼
+             ┌───────────────────┐
+             │    Docker Hub     │
+             └─────────┬─────────┘
+                       │
+                       ▼
+                  🚀 Deploy
+```
+
+---
+
+# 📊 Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Python | Programming language |
+| Flask | Web framework |
+| Pytest | Unit testing |
+| Git | Version control |
+| GitHub | Source code repository |
+| GitHub Actions | CI/CD automation |
+| YAML | Workflow configuration |
+| Docker | Containerization |
+| Docker Hub | Container registry |
+
+---
+
+# 🎯 Project Objectives
+
+The main objectives of this project are:
+
+- Understand CI/CD fundamentals
+- Learn GitHub Actions
+- Create YAML workflow files
+- Automate Python testing
+- Understand unit testing
+- Build Docker images
+- Push Docker images to Docker Hub
+- Use GitHub Secrets
+- Understand automated software delivery
+- Learn the relationship between Git, GitHub, Docker, and CI/CD
+
+---
+
+# 🚀 Future Improvements
+
+The pipeline can be extended with:
+
+- Docker image versioning
+- GitHub Container Registry
+- AWS deployment
+- Azure deployment
+- Kubernetes deployment
+- Docker Compose
+- Security scanning
+- Code coverage
+- Code quality checks
+- Slack/Discord notifications
+- Staging environment
+- Production environment
+- Automatic rollback
+- Application monitoring
+
+An advanced pipeline could look like:
+
+```text
+Developer
+    ↓
+Git Push
+    ↓
+GitHub Actions
+    ↓
+Linting
+    ↓
+Unit Tests
+    ↓
+Integration Tests
+    ↓
+Security Scan
+    ↓
+Docker Build
+    ↓
+Docker Image Scan
+    ↓
+Docker Hub / GHCR
+    ↓
+Staging
+    ↓
+Production
+    ↓
+Monitoring
+```
+
+---
+
+# 🧠 Key Concepts Learned
+
+This project demonstrates:
+
+- Continuous Integration
+- Continuous Deployment
+- GitHub Actions
+- YAML
+- Git
+- GitHub
+- Python Virtual Environments
+- Flask
+- Unit Testing
+- Pytest
+- Docker
+- Dockerfile
+- Docker Images
+- Docker Containers
+- Docker Hub
+- GitHub Secrets
+- Automated Testing
+- Automated Builds
+- Containerization
+
+---
+
+# 👨‍💻 Author
+
+**Sadashiv Gawade**
+
+B.Tech Information Technology
+
+### Areas of Interest
+
+- Artificial Intelligence & Machine Learning
+- Python Development
+- Data Science
+- Full-Stack Development
+- DevOps
+- CI/CD
+
+---
+
+# ⭐ Conclusion
+
+This project demonstrates how a simple Flask application can be transformed into an automated CI/CD pipeline.
+
+Instead of manually performing every step:
+
+```text
+Code → Test → Build → Dockerize → Push
+```
+
+GitHub Actions automates the process:
+
+```text
+Git Push
+    ↓
+GitHub Actions
+    ↓
+Unit Tests
+    ↓
+Build
+    ↓
+Docker Image
+    ↓
+Docker Hub
+    ↓
+Deployment
+```
+
+The project provides a practical foundation for understanding how modern development teams automate application testing, containerization, and delivery.
